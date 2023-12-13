@@ -42,13 +42,13 @@ export class SalesOrderIndex extends Component {
       loading: false,
       sales: [],
       products: [],
-      total_sales:[],
+      total_sales: [],
       order: "",
-      value:"",
+      value: "",
       total: 0,
       total_cart: 0,
       cartItem: [],
-      options:[]
+      options: [],
     };
     this.cartItem = JSON.parse(localStorage.getItem("cart"));
     this.setState({ cartItem: this.cartItem });
@@ -63,7 +63,6 @@ export class SalesOrderIndex extends Component {
     toast(<div style={{ padding: 20, color: "success" }}>{msg}</div>);
   };
   getSalesOrders = () => {
-
     const { page, rows, order, search, products } = this.state;
     console.log(order);
     this.setState({ loading: true });
@@ -74,9 +73,9 @@ export class SalesOrderIndex extends Component {
           loading: false,
           sales: res.sales_orders.data,
           products: res.products,
-          total_sales:res.total_sales,
-          suppliers:res.suppliers,
-          branches:res.branches,
+          total_sales: res.total_sales,
+          suppliers: res.suppliers,
+          branches: res.branches,
           total: res.sales_orders.total,
         });
       },
@@ -86,66 +85,62 @@ export class SalesOrderIndex extends Component {
     );
   };
 
-  formatCurrency(x){
-    if(x!=='null' && x!=='0'){
+  formatCurrency(x) {
+    if (x !== "null" && x !== "0") {
       const parts = x.toString().split(".");
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `\u20a6${parts.join(".")}`;
     }
-    return '0';
+    return "0";
   }
-
-
-  
 
   toggleFilter = () => {
     this.setState({ showFilter: !this.state.showFilter });
   };
-  sleep = ms =>
-  new Promise(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, ms);
-  });
+  sleep = (ms) =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, ms);
+    });
 
   loadOptions = async (search, prevOptions) => {
-    options=[];
+    options = [];
     var options = this.state.products.map((product, key) => {
-        return ({
-            value:product.id,
-            label:product.name
-        });
-      });
+      return {
+        value: product.id,
+        label: product.name,
+      };
+    });
     await this.sleep(1000);
-  
+
     let filteredOptions;
     if (!search) {
       filteredOptions = options;
     } else {
       const searchLower = search.toLowerCase();
-  
+
       filteredOptions = options.filter(({ label }) =>
         label.toLowerCase().includes(searchLower)
       );
     }
-  
+
     const hasMore = filteredOptions.length > prevOptions.length + 10;
     const slicedOptions = filteredOptions.slice(
       prevOptions.length,
       prevOptions.length + 10
     );
-  
+
     return {
       options: slicedOptions,
-      hasMore
+      hasMore,
     };
   };
   handleChange = async (value) => {
-      console.log(value);
+    console.log(value);
     this.setState({
-      value:value,
-      order:value.value
-      
+      value: value,
+      order: value.value,
     });
     this.getSalesOrders();
   };
@@ -173,7 +168,7 @@ export class SalesOrderIndex extends Component {
   inCart = (cartId) => {
     let inCartIds = this.state.cartItem;
 
-    if (inCartIds !== null && localStorage.getItem('cart') !== null) {
+    if (inCartIds !== null && localStorage.getItem("cart") !== null) {
       var result = inCartIds.map((product, key) => {
         return product.id;
       });
@@ -279,7 +274,6 @@ export class SalesOrderIndex extends Component {
         {cartCheckout && (
           <Cart
             saved={this.getSalesOrders}
-
             cartCheckout={cartCheckout}
             toggle={() => this.setState({ cartCheckout: null })}
           />
@@ -302,25 +296,22 @@ export class SalesOrderIndex extends Component {
               </div>
               <div className="btn-toolbar mb-2 mb-md-0">
                 <ButtonGroup>
-                  
-                  <Button variant="outline-primary" size="sm"  
-                  onClick={() => {this.props.history.push('/products')}}
-
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => {
+                      this.props.history.push("/products");
+                    }}
                   >
                     Products
                   </Button>
-
-                  
-              
                 </ButtonGroup>
               </div>
             </div>
           </Col>
         </Row>
         <Row>
-        <div className="btn-toolbar mb-2 mb-md-0">
-           
-              </div>
+          <div className="btn-toolbar mb-2 mb-md-0"></div>
           <Col lg="7">
             <h6>sales({total})</h6>
             {/*<AsyncPaginate
@@ -419,14 +410,24 @@ export class SalesOrderIndex extends Component {
         <Card border="light" className="shadow-sm mb-4">
           <Row>
             <Col lg="11">
-                <div style={{fontSize:"18px",paddingTop:"20px",color:"red",
-                paddingLeft:"10px",fontWeight:"bold"}}>
+              <div
+                style={{
+                  fontSize: "18px",
+                  paddingTop: "20px",
+                  color: "green",
+                  paddingLeft: "10px",
+                  fontWeight: "bold",
+                }}
+              >
                 Total Sold:&nbsp;&#8358;
                 {total_sales.map((total, key) => {
-                    return (total.total !== null ? total.total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    : "----");
+                  return total.total !== null
+                    ? total.total
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    : "----";
                 })}
-                </div>
+              </div>
             </Col>
             <Col lg="1" style={{ color: "primary", paddingTop: "15px" }}>
               <div className="btn-toolbar mb-2 mb-md-0">
@@ -474,15 +475,20 @@ export class SalesOrderIndex extends Component {
                       <td>{sale.in_stock}</td>
                       <td>{this.formatCurrency(sale.unit_price)}</td>
                       <td>{this.formatCurrency(sale.unit_selling_price)}</td>
-                      <td>{this.formatCurrency(sale.quantity_sold*sale.unit_selling_price)}</td>
                       <td>
-                       <Button color="primary" size="sm" 
-                       onClick={() => this.toggleCart(cartItem)}
-                        >
-                            View Details
-                       </Button>                  
+                        {this.formatCurrency(
+                          sale.quantity_sold * sale.unit_selling_price
+                        )}
                       </td>
-                      
+                      <td>
+                        <Button
+                          color="primary"
+                          size="sm"
+                          onClick={() => this.toggleCart(cartItem)}
+                        >
+                          View Details
+                        </Button>
+                      </td>
                     </tr>
                   );
                 })}

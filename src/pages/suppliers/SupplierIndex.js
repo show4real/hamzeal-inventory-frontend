@@ -16,17 +16,11 @@ import {
   Breadcrumb,
   Form,
 } from "@themesberg/react-bootstrap";
-
-import { Pagination } from 'antd';
+import moment from "moment";
+import { Pagination } from "antd";
 import SpinDiv from "../components/SpinDiv";
-import axios from "axios";
-import settings from "../../services/settings";
-import { authHeader } from "../../services/authHeader";
-import { authService } from "../../services/authService";
-import { counter } from "@fortawesome/fontawesome-svg-core";
-import { Cart } from "../products/Cart";
-import { AsyncPaginate } from "react-select-async-paginate";
-import { getSuppliers,addSuppliers } from "../../services/supplierService";
+import * as XLSX from "xlsx";
+import { getSuppliers, addSuppliers } from "../../services/supplierService";
 import AddSupplier from "./AddSupplier";
 import DeleteSupplier from "./DeleteSupplier";
 
@@ -40,22 +34,20 @@ export class SupplierIndex extends Component {
       loading: false,
       suppliers: [],
       order: "",
-      value:"",
+      value: "",
       total: 0,
-      options:[]
+      options: [],
     };
   }
 
   componentDidMount() {
     this.getSuppliers();
-   
   }
 
   showToast = (msg) => {
     toast(<div style={{ padding: 20, color: "success" }}>{msg}</div>);
   };
   getSuppliers = () => {
-
     const { page, rows, order, search } = this.state;
     console.log(order);
     this.setState({ loading: true });
@@ -74,13 +66,82 @@ export class SupplierIndex extends Component {
     );
   };
 
-  
+  export = async () => {
+    const { page, search, total, order } = this.state;
+    const rows = 10000;
+
+    if (total < 1) {
+      await setTimeout(
+        () => this.showToast("No income history to export."),
+        250
+      );
+    } else {
+      this.setState({ loading: true });
+
+      getSuppliers({
+        page,
+        rows,
+        search,
+        order,
+      }).then(
+        (response) => {
+          let exportt = "";
+
+          exportt = response.suppliers.data.map((c) => ({
+            supplier: c.name,
+            no_orders: c.orders_count,
+            supplier_id: c.supplier_id,
+            email: c.email,
+            phone: c.phone,
+            city: c.city,
+            country: c.country,
+            created_on: moment(c.created_at).format("MMM DD YYYY"),
+          }));
+
+          const theheader = [
+            "supplier",
+            "no_orders",
+            "supplier_id",
+            "email",
+            "phone",
+            "country",
+            "created_on",
+          ];
+          const wch = [30, 20, 15, 20, 40, 20, 20, 20, 20];
+          const cols = wch.map((h) => {
+            return { wch: h };
+          });
+          const thedata = exportt.map((item) => {
+            return theheader.map((item2) => {
+              return item[item2];
+            });
+          });
+
+          const headerTitle = "your header title here";
+
+          const allofit = [theheader].concat(thedata);
+
+          const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(allofit);
+
+          const wb: XLSX.WorkBook = XLSX.utils.book_new(headerTitle);
+          ws["!cols"] = cols;
+          XLSX.utils.book_append_sheet(wb, ws, `Supplier`);
+          XLSX.writeFile(wb, `Suppliers-data-.xlsx`);
+          this.setState({
+            loading: false,
+          });
+        },
+        (error) => {
+          this.setState({ loading: false });
+        }
+      );
+    }
+  };
 
   toggleFilter = () => {
     this.setState({ showFilter: !this.state.showFilter });
   };
-  
-  
+
   onFilter = async (e, filter) => {
     console.log(filter);
     await this.setState({ [filter]: e });
@@ -90,17 +151,16 @@ export class SupplierIndex extends Component {
   onPage = async (page, rows) => {
     await this.setState({ page, rows });
     await this.getSuppliers();
-  }
+  };
 
-  
   toggleAddSupplier = () => {
     this.setState({ addSupplier: !this.state.addSupplier });
   };
 
   toggleDeleteSupplier = (deleteSupplier) => {
     this.setState({ deleteSupplier });
-  }
-  
+  };
+
   onChange = (e, state) => {
     this.setState({ [state]: e });
   };
@@ -153,19 +213,26 @@ export class SupplierIndex extends Component {
                   <Button
                     variant="outline-primary"
                     size="sm"
+                    onClick={this.export}
+                  >
+                    Export Suppliers
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
                     onClick={() => this.toggleAddSupplier()}
                   >
                     Create Suppliers
                   </Button>
-                  <Button variant="outline-primary" size="sm"  
-                  onClick={() => {this.props.history.push('/products')}}
-
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => {
+                      this.props.history.push("/products");
+                    }}
                   >
                     Products
                   </Button>
-
-                  
-                 
                 </ButtonGroup>
               </div>
             </div>
@@ -174,9 +241,8 @@ export class SupplierIndex extends Component {
         <Row>
           <Col lg="7">
             <h6>Supliers({total})</h6>
-           
           </Col>
-    
+
           <Col lg="4" className="">
             <div style={{ display: "flex" }}>
               <Input
@@ -207,14 +273,13 @@ export class SupplierIndex extends Component {
             </div>
           </Col>
         </Row>
-        
+
         <Card border="light" className="shadow-sm mb-4">
-          
           <Card.Body className="pb-0">
             <Table
               responsive
               className="table-centered table-nowrap rounded mb-0"
-              style={{fontWeight:'bold'}}
+              style={{ fontWeight: "bold" }}
             >
               <thead className="thead-light">
                 <tr>
@@ -230,7 +295,6 @@ export class SupplierIndex extends Component {
               </thead>
               <tbody>
                 {suppliers.map((supplier, key) => {
-                 
                   return (
                     <tr key={key}>
                       <td>{supplier.name}</td>
@@ -238,46 +302,68 @@ export class SupplierIndex extends Component {
                       <td>{supplier.supplier_id}</td>
 
                       <td>{supplier.city == null ? " " : supplier.city}</td>
-                      <td>{supplier.country == null ? " " : supplier.country}</td>
+                      <td>
+                        {supplier.country == null ? " " : supplier.country}
+                      </td>
                       <td>{supplier.email == null ? " " : supplier.email}</td>
                       <td>{supplier.phone == null ? " " : supplier.phone}</td>
-                      
 
                       <td>
-                       <ButtonGroup>
-                       <Button variant="outline-primary" size="sm" onClick={() => {//console.log('111')
-                            this.props.history.push('/supplier/'+supplier.id)
-                          }}>
-                          View
-                        </Button>
-                        <Button variant="outline-danger"  size="sm" onClick={() => {//console.log('111')
-                           this.toggleDeleteSupplier(supplier)
-                          }}>
-                          Delete
-                        </Button>
-                       </ButtonGroup>
+                        <ButtonGroup>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => {
+                              //console.log('111')
+                              this.props.history.push(
+                                "/supplier/" + supplier.id
+                              );
+                            }}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => {
+                              //console.log('111')
+                              this.toggleDeleteSupplier(supplier);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </ButtonGroup>
                       </td>
-                    
                     </tr>
                   );
                 })}
               </tbody>
             </Table>
             <Row>
-                  <Col md={12} style={{ fontWeight: "bold", paddingTop: 3 }}>
-                    
-                    {suppliers.length > 0 ? <Pagination
-                      total={total}
-                      showTotal={total => `Total ${total} Stocks`}
-                      onChange={this.onPage}
-                      pageSize={rows}
-                      current={page}
-                    /> :  <div style={{color: '#ccc', alignSelf: 'center', padding: 10, fontSize: 13}}>
-                    <i className="fa fa-ban" style={{marginRight: 5}}/>
+              <Col md={12} style={{ fontWeight: "bold", paddingTop: 3 }}>
+                {suppliers.length > 0 ? (
+                  <Pagination
+                    total={total}
+                    showTotal={(total) => `Total ${total} Stocks`}
+                    onChange={this.onPage}
+                    pageSize={rows}
+                    current={page}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      color: "#ccc",
+                      alignSelf: "center",
+                      padding: 10,
+                      fontSize: 13,
+                    }}
+                  >
+                    <i className="fa fa-ban" style={{ marginRight: 5 }} />
                     No Suppliers found
-                  </div>}
-                  </Col>
-                </Row>
+                  </div>
+                )}
+              </Col>
+            </Row>
           </Card.Body>
         </Card>
       </>

@@ -359,7 +359,7 @@ export class Invoice extends React.Component {
             </div>
 
             <table style={{ marginLeft: 20 }}>
-              <tr>
+              {/* <tr>
                 <td colSpan={3}>&nbsp;&nbsp; __________________________</td>
               </tr>
               <tr style={{ marginBottom: "20px" }}>
@@ -376,7 +376,7 @@ export class Invoice extends React.Component {
                     Customer Signature
                   </span>
                 </td>
-              </tr>
+              </tr> */}
               <tr style={{ marginBottom: "20px" }}>
                 <td>
                   <span

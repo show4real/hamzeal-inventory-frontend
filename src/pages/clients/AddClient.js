@@ -28,21 +28,20 @@ export class AddClient extends Component {
       phone: "",
       email: "",
       name: "",
-      company_name:'',
+      company_name: "",
     };
   }
   onChange = (e, state) => {
     this.setState({ [state]: e });
   };
 
-  componentDidMount() {
-    
-  }
+  componentDidMount() {}
 
   onSaveClient = async (e) => {
     e.preventDefault();
     await toast.dismiss();
-    const { name, address, phone, email, validation, company_name } = this.state;
+    const { name, address, phone, email, validation, company_name } =
+      this.state;
     await this.setState({
       validation: {
         ...validation,
@@ -58,32 +57,28 @@ export class AddClient extends Component {
       //await toast.configure({hideProgressBar: true, closeButton: false});
       toast.dismiss();
       toast.configure({ hideProgressBar: true, closeButton: false });
-          toast(
-            <div style={{ padding: "10px 20px" }}>
-              <p style={{ margin: 0, fontWeight: "bold",color:"red" }}>Errors:</p>
-              {errors.map((v) => (
-                <p key={v} style={{ margin: 0, fontSize: 14,color:"red" }}>
-                  * {this.validationRules(v)}
-                </p>
-              ))}
-            </div>
-          )
-        
+      toast(
+        <div style={{ padding: "10px 20px" }}>
+          <p style={{ margin: 0, fontWeight: "bold", color: "red" }}>Errors:</p>
+          {errors.map((v) => (
+            <p key={v} style={{ margin: 0, fontSize: 14, color: "red" }}>
+              * {this.validationRules(v)}
+            </p>
+          ))}
+        </div>
+      );
     }
   };
- 
-
-  
 
   validationRules = (field) => {
     if (field === "name") {
       return "Name field is required";
-    } 
+    }
   };
 
   saveClient = () => {
     this.setState({ loading: true });
-    const {history }=this.props
+    const { history } = this.props;
     const { name, company_name, phone, email, address } = this.state;
     console.log();
     addClient({
@@ -92,15 +87,16 @@ export class AddClient extends Component {
       email: email,
       phone: phone,
       address: address,
-    }).then(
-      (res) => {
+    })
+      .then((res) => {
         console.log(res);
         this.setState({ loading: false });
-        this.props.toggle();
-        this.props.saved();
-        this.showToast("Client saved");
 
-      }).catch((err) => {
+        this.props.saved();
+        this.props.toggle();
+        this.showToast("Client saved");
+      })
+      .catch((err) => {
         console.log(err);
         this.setState({
           errorMessage: err,
@@ -114,11 +110,11 @@ export class AddClient extends Component {
   };
 
   onClose = (e) => {
-    console.log(e, 'I was closed.');
+    console.log(e, "I was closed.");
   };
 
   showToast = (msg) => {
-    toast(<div style={{ padding: 20}}>{msg}</div>);
+    toast(<div style={{ padding: 20 }}>{msg}</div>);
   };
 
   render() {
@@ -160,24 +156,24 @@ export class AddClient extends Component {
                 <Col md={6} className="mb-3">
                   <Form.Group id="Name">
                     <Form.Label>Name</Form.Label>
-                    <Form.Control 
+                    <Form.Control
                       placeholder="Enter Name"
-                      type="text" 
+                      type="text"
                       onChange={async (e) => {
                         await this.onChange(e.target.value, "name");
-                      }} />
+                      }}
+                    />
                   </Form.Group>
                 </Col>
                 <Col md={6} className="mb-3">
                   <Form.Group id="lastName">
                     <Form.Label>Email</Form.Label>
                     <Form.Control
-                   
                       type="text"
                       onChange={async (e) => {
                         await this.onChange(e.target.value, "email");
                       }}
-                     placeholder='Enter Client Email'
+                      placeholder="Enter Client Email"
                     />
                   </Form.Group>
                 </Col>
@@ -187,12 +183,11 @@ export class AddClient extends Component {
                   <Form.Group id="phone">
                     <Form.Label>Phone</Form.Label>
                     <Form.Control
-                   
                       type="number"
                       onChange={async (e) => {
                         await this.onChange(e.target.value, "phone");
                       }}
-                     placeholder='Enter Client Phone'
+                      placeholder="Enter Client Phone"
                     />
                   </Form.Group>
                 </Col>
@@ -200,18 +195,15 @@ export class AddClient extends Component {
                   <Form.Group id="phone">
                     <Form.Label>Address</Form.Label>
                     <Form.Control
-                   
                       type="textarea"
                       onChange={async (e) => {
                         await this.onChange(e.target.value, "address");
                       }}
-                      placeholder='Enter Address'
+                      placeholder="Enter Address"
                     />
                   </Form.Group>
                 </Col>
-                
               </Row>
-              
 
               <Row style={{ marginTop: "10px" }}>
                 <Col md={12}>
