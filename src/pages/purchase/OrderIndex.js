@@ -125,6 +125,11 @@ export class StockIndex extends Component {
     this.getPurchaseOrders();
   };
 
+  onPage = async (page, rows) => {
+    await this.setState({ page, rows });
+    await this.getPurchaseOrders();
+  };
+
   formatCurrency(x) {
     if (x !== null && x !== 0) {
       const parts = x.toString().split(".");
