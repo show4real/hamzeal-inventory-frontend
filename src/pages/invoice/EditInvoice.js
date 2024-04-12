@@ -379,7 +379,6 @@ export class EditInvoice extends Component {
       balance: balance,
       previous_payment: previous_payment,
     });
-    console.log(previous_payment);
   }
 
   render() {

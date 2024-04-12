@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Col,
   Row,
@@ -14,14 +14,17 @@ import {
 } from "@themesberg/react-bootstrap";
 import moment from "moment";
 import "./style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faGlobe, faPhone, faVoicemail } from '@fortawesome/free-solid-svg-icons';
-import { addCompanyProfile, getCompany } from "../../services/companyService"
-import { toWords } from "../../services/numberWordService"
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faGlobe,
+  faPhone,
+  faVoicemail,
+} from "@fortawesome/free-solid-svg-icons";
+import { addCompanyProfile, getCompany } from "../../services/companyService";
+import { toWords } from "../../services/numberWordService";
 
 export class Invoice extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -35,21 +38,19 @@ export class Invoice extends React.Component {
   }
 
   getWords(amount) {
-    return toWords(amount)
+    return toWords(amount);
   }
-
 
   totalCost = () => {
     const { items } = this.props;
-
     var total = 0;
     for (let v = 0; v < items.length; v++) {
       total += items[v].rate * items[v].quantity;
     }
     return total;
   };
-  formatCurrency2(x) {
 
+  formatCurrency2(x) {
     if (x !== null && x !== 0 && x !== undefined) {
       const parts = x.toString().split(".");
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -59,187 +60,210 @@ export class Invoice extends React.Component {
   }
 
   formatCurrency(y, x) {
-    if (x !== 'null' && x !== '0') {
+    if (x !== "null" && x !== "0") {
       const parts = x.toString().split(".");
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `${y}${parts.join(".")}`;
     }
-    return '0';
+    return "0";
   }
 
+  formatProductName(productName) {
+    const words = productName.split(" ");
+    const chunkedWords = [];
+    for (let i = 0; i < words.length; i += 3) {
+      chunkedWords.push(words.slice(i, i + 3).join(" "));
+    }
+    return chunkedWords.join("<br/>");
+  }
+
+  formatTitle(productName) {
+    const words = productName.split(" ");
+    const chunkedWords = [];
+    for (let i = 0; i < words.length; i += 5) {
+      chunkedWords.push(words.slice(i, i + 5).join(" "));
+    }
+    return chunkedWords.join("<br/>");
+  }
 
   render() {
-    const { invoice, user, previous_payment, pos_items, items, company } = this.props;
+    const { invoice, user, previous_payment, pos_items, items, company } =
+      this.props;
 
     return (
-      <div style={{ padding: 10, }}>
-        {Object.keys(invoice).length !== 0 &&
-          <body>
-            <header >
-
-              <div class="logo" style={{ fontWeight: 600, color: 'black' }}><img width={100} src={`${company && company.logo_url}`} /></div>
-              <h1 style={{ fontWeight: 600, fontFamily: 'monaco, Consolas, Lucida Console, monospace', textAlign: 'center', color: 'black' }}>
-                {company !== null ? company.name : ' '}
-              </h1>
+      <Card style={{ padding: "10px", width: "100%" }}>
+        {Object.keys(invoice).length !== 0 && (
+          <div>
+            <header>
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: "10px",
+                  marginTop: "5px",
+                }}
+              >
+                {/* <img
+                  src={`${company && company.logo_url}`}
+                  width="100"
+                  alt="Company Logo"
+                /> */}
+                <h1 style={{ fontWeight: 600 }}>
+                  {company !== null ? company.name : ""}
+                </h1>
+              </div>
             </header>
 
+            <div
+              style={{
+                marginBottom: "10px",
+                fontWeight: 800,
+                fontSize: "18px",
+                textAlign: "center",
+              }}
+            >
+              <div>
+                <FontAwesomeIcon icon={faPhone} /> {company.phone_one}, &nbsp;
+                {company.phone_two}
+              </div>
+              <div>
+                <FontAwesomeIcon icon={faGlobe} />
+                &nbsp;{company.website}
+              </div>
+            </div>
 
+            <div
+              style={{
+                marginBottom: "10px",
+                display: "flex",
+                padding: 15,
+                justifyContent: "space-between",
+                fontSize: "18px",
+              }}
+            >
+              <div style={{ textAlign: "left" }}>
+                <span>
+                  Date: {moment(invoice.issued_date).format("MMM DD YYYY")}
+                  {invoice.due_date === invoice.issued_date
+                    ? ""
+                    : `  Due:` + moment(invoice.due_date).format("MMM DD YYYY")}
+                </span>
+                <br />
+                Invoice #: {invoice.invoice_no}
+                <br />
+                {company && company.address}
+              </div>
 
+              <div style={{ textAlign: "right" }}>
+                <span>
+                  {invoice.client.name}
+                  <br />
+                  {invoice.client.address}
+                  <br />
+                  {invoice.client.phone}
+                  <br />
+                  {invoice.client.email !== "" ? invoice.client.email : ""}
+                </span>
+              </div>
+            </div>
 
-            <table  >
-              <tbody>
-                <tr >
-                  <th class="center-align" colspan="2"><span class="receipt" style={{ whiteSpace:'pre-line',fontWeight: 600, fontSize: 20, lineHeight: 1.6, fontFamily: 'monaco, Consolas, Lucida Console, monospace', color: 'black' }}>
-                    {company && company.invoice_header}
-                  </span></th>
-                </tr>
-                {company && <tr>
-                  <th class="center-align"><span class="receipt" style={{ fontWeight: 600, fontSize: 20, lineHeight: 1.6, fontFamily: 'monaco, Consolas, Lucida Console, monospace', color: 'black' }}>
-                    <span><FontAwesomeIcon icon={faPhone} /> {company.phone_one}, &nbsp;{company.phone_two}</span><span>&nbsp;&nbsp;
-                      <FontAwesomeIcon icon={faGlobe} />&nbsp;{company.website}</span>
-                  </span></th>
-
-                </tr>}
-              </tbody>
-            </table>
-
-            <table class="bill-details" style={{ marginTop: 30, marginLeft:23 }}>
-              <tbody>
-
-                <tr >
-                  <td style={{ fontWeight: 600, color: 'black', fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', lineHeight: 1.6 }}><span>
-                    Date:{moment(invoice.issued_date).format('MMM DD YYYY')}<br />
-                    {invoice.due_date === invoice.issued_date ? '' : `  Due:` + moment(invoice.due_date).format('MMM DD YYYY')}<br /></span>
-                    Invoice #:{invoice.invoice_no}<br />
-                    <span style={{whiteSpace:'pre-line'}}>
-                      {company && company.address}<br />
-                    </span>
-
-                  </td>
-
-
-
-
-                  <td style={{ paddingRight: 92, textAlign: 'right', fontWeight: 600, fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', color: 'black', lineHeight: 1.6 }}>
-                    <span>
-                      {invoice.client.name}<br />
-                      {invoice.client.address}<br />
-                      {invoice.client.phone}<br />
-                      {invoice.client.email !== '' ? invoice.client.email : ''}
-
-                    </span>
-                  </td>
-                </tr>
+            <Table striped bordered hover style={{ marginBottom: "10px" }}>
+              <thead>
                 <tr>
-
-
-                </tr>
-
-              </tbody>
-            </table>
-
-            <table style={{marginLeft:25, marginTop:15, fontSize:20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', fontWeight:700, color: 'black'}}>
-              <thead style={{ }}>
-                <tr>
-                  {/* <th class="heading name" style={{ paddingLeft:10, color:'black', fontFamily: 'monaco, Consolas, Lucida Console, monospace', textAlign:'justify', fontSize:18, fontWeight:700}}>Item</th> */}
                   <th>Description</th>
-                  <th >Qty</th>
+                  <th>Qty</th>
                   <th>Rate</th>
                   <th>Cost</th>
                 </tr>
               </thead>
-
-              <tbody>
-                
-                 {Object.keys(pos_items).length !== 0 ? pos_items.map((item, key) => {
-
-                      return (
-                        <tr style={{}}>
-                         
-
-                          <td >{item.order.product_name}</td>
-                          <td style={{ verticalAlign: 'top' }}>{item.qty_sold}</td>
-                          <td style={{ verticalAlign: 'top' }}>{this.formatCurrency2(item.selling_price)}</td>
-                          <td style={{ verticalAlign: 'top' }}>{this.formatCurrency2(item.selling_price*item.qty_sold)}</td>
-                        </tr>
-
-                      );
-                      }) : ''}
-                      <tr>
-                  <td colSpan={3}>
-
-                  </td>
-                  <td >
-                    <tr style={{ paddingTop: 20 }}>
-                      <td>Total:{this.formatCurrency(invoice.currency, invoice.amount)}</td>
-                    </tr>
-
-                    <tr style={{ paddingTop: 10 }}>
-                      <td>Paid:{this.formatCurrency(invoice.currency, invoice.total_payment)}</td>
-
-
-                    </tr>
-                    <tr style={{ paddingTop: 10 }}>
-                      {invoice.total_balance > 0 && <>
-                        <td>Balance:{this.formatCurrency(invoice.currency, invoice.total_balance)}</td>
-                      </>}
-                    </tr>
-                  </td>
-                </tr>
-
-
-
-
+              <tbody style={{ fontWeight: 800, fontSize: "18px" }}>
+                {pos_items.map((item, key) => (
+                  <tr key={key}>
+                    <td
+                      dangerouslySetInnerHTML={{
+                        __html: this.formatProductName(
+                          item.order.product_name +
+                            " " +
+                            item.order.product_description
+                        ),
+                      }}
+                    ></td>
+                    <td>{item.qty_sold}</td>
+                    <td>{this.formatCurrency2(item.selling_price)}</td>
+                    <td>
+                      {this.formatCurrency2(item.selling_price * item.qty_sold)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
-            </table>
-           
+            </Table>
 
+            <div style={{ marginBottom: "10px", fontWeight: 800, padding: 15 }}>
+              Total: {this.formatCurrency(invoice.currency, invoice.amount)}
+              <br />
+              Paid:{" "}
+              {this.formatCurrency(invoice.currency, invoice.total_payment)}
+              <br />
+              {invoice.total_balance > 0 && (
+                <>
+                  Balance:{" "}
+                  {this.formatCurrency(invoice.currency, invoice.total_balance)}
+                </>
+              )}
+            </div>
 
-            <div style={{
-              fontWeight: 800, textTransform: 'uppercase', paddingLeft: 20, fontSize: '13px', color: 'black', fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace',
-              verticalAlign: 'bottom', lineHeight: 1.6, marginTop: 30
-            }}><strong>Amount in word:{this.getWords(invoice.amount) + ` ` + invoice.currency}</strong></div>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontWeight: 800,
+                padding: 10,
+                fontSize: "18px",
+              }}
+            >
+              Amount in words:{" "}
+              {this.getWords(invoice.amount) + ` ` + invoice.currency}
+            </div>
 
+            <div
+              style={{
+                marginBottom: "10px",
+                fontWeight: 800,
+                padding: 10,
+                fontSize: "18px",
+              }}
+            >
+              {company && company.invoice_footer_one}
+            </div>
 
-            <div style={{
-              fontWeight: 800, paddingLeft: 20, fontSize: '13px', color: 'black', fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace',
-              verticalAlign: 'bottom', lineHeight: 1.6
-            }}><strong>{company && company.invoice_footer_one}</strong></div>
-            <div style={{
-              fontWeight: 700, paddingLeft: 20, fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', color: 'black',
-              verticalAlign: 'bottom'
-            }}>Terms and Condition!</div>
-            <div style={{whiteSpace:'pre-line',
-              fontWeight: 800, paddingLeft: 20, fontSize: 20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', color: 'black',
-              verticalAlign: 'bottom', lineHeight: 1.6, marginBottom: 30
-            }}>
+            <div
+              style={{
+                fontWeight: 700,
+                marginBottom: "10px",
+                padding: 10,
+                fontSize: "18px",
+              }}
+            >
+              Terms and Conditions!
+            </div>
 
+            <div
+              style={{ marginBottom: "10px", padding: 15, fontSize: "18px" }}
+            >
               {company && company.invoice_footer_two}
             </div>
 
-
-            <table style={{marginLeft:20}}>
-              <tr >
-                <td colSpan={3}>&nbsp;&nbsp;  __________________________</td>
-
-
-              </tr>
-              <tr style={{ marginBottom: '20px' }}>
-                <td><span style={{ fontSize: 20, paddingLeft:20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', paddingLeft: 10, color: 'black' }}>Customer Signature</span></td>
-              </tr>
-              <tr style={{ marginBottom: '20px' }}>
-                <td><span style={{ fontSize: 20, paddingLeft:20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', paddingLeft: 10, color: 'black' }}></span></td>
-              </tr>
-
-              <tr style={{ marginTop: 40, }}>
-                <td><span style={{ fontSize: 20, paddingLeft:20, fontFamily: 'monaco, Consolas, Lucida Console, monospace', paddingLeft: 10, color: 'black' }}>Cashier: {invoice.cashier_name}</span></td>
-              </tr>
-            </table>
-
-          </body>
-        }
-      </div>
-
+            <div
+              style={{
+                marginBottom: "10px",
+                fontWeight: 700,
+                padding: 15,
+                fontSize: "18px",
+              }}
+            >
+              Cashier: {invoice.cashier_name}
+            </div>
+          </div>
+        )}
+      </Card>
     );
   }
 }
